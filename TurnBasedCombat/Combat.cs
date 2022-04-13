@@ -9,7 +9,7 @@ public class Combat : MonoBehaviour
     int aiHP = 10;
 
     bool playerIsDefending = false;
-    bool aiIsCharging = false;
+    // bool aiIsCharging = false;
     bool aiTurn = false;
     bool end = false;
 
@@ -23,8 +23,6 @@ public class Combat : MonoBehaviour
     void Update()
     {
         if(!end) {
-            CheckHealth();
-
             // Player's turn
             if(Input.GetKeyUp(KeyCode.Alpha1)) {
                 PlayerAttack();
@@ -34,25 +32,36 @@ public class Combat : MonoBehaviour
                 PlayerDefend();
             }
 
+            CheckHealth();
+
             // AI's turn
-            if(aiTurn) {
-                if(aiIsCharging && !playerIsDefending) {
-                    playerHP = 0;
+            if(aiTurn && !end) {
+                // if(aiIsCharging && !playerIsDefending) {
+                //     playerHP = 0;
+                // } else {
+                //     int prob = Random.Range(1, 101);
+                //     if(prob > 65) {
+                //         AiCharge();
+                //     } else {
+                //         AiAttack();
+                //     }
+                // }
+                int prob = Random.Range(1, 101);
+                if(prob > 80) {
+                    AiCrit();
+                } else if(prob > 50 && prob <= 80 && aiHP <= 5) {
+                    AiHeal();
                 } else {
-                    int prob = Random.Range(1, 101);
-                    if(prob > 65) {
-                        AiCharge();
-                    } else {
-                        AiAttack();
-                    }
+                    AiAttack();
                 }
                 aiTurn = false;
+                playerIsDefending = false;
             }
         }
     }
 
     void ShowMessage() {
-        Debug.Log("Choose your action: (1) Attack, (2) Heal, (3) Defend");
+        if(!end) Debug.Log("Choose your action: (1) Attack, (2) Heal, (3) Defend");
     }
 
     void CheckHealth() {
@@ -69,7 +78,7 @@ public class Combat : MonoBehaviour
         playerHP = 10;
         aiHP = 10;
         playerIsDefending = false;
-        aiIsCharging = false;
+        // aiIsCharging = false;
     }
 
     void DisplayStats() {
@@ -103,9 +112,14 @@ public class Combat : MonoBehaviour
     }
 
     void AiAttack() {
-        int attackPoints = Random.Range(2, 5);
+        int attackPoints = Random.Range(1, 3);
         if(playerIsDefending) {
             Debug.Log("AI is attacking! You defended the attack! You loose no HP.");
+            int rand = Random.Range(1, 101);
+            if(rand > 80) {
+                Debug.Log($"Uh oh, the AI broke your defense! The AI does { attackPoints } damage!");
+                playerHP -= attackPoints;
+            }
         } else {
             Debug.Log($"The AI attacks and does { attackPoints } damage!");
             playerHP -= attackPoints;
@@ -114,10 +128,34 @@ public class Combat : MonoBehaviour
         ShowMessage();
     }
 
-    void AiCharge() {
-        Debug.Log("The AI is charging energy!");
-        aiIsCharging = true;
+    void AiHeal() {
+        aiHP += 2;
+        Debug.Log("The AI healed itself!");
         DisplayStats();
         ShowMessage();
     }
+
+    void AiCrit() {
+        int attackPoints = Random.Range(2, 5);
+        if(playerIsDefending) {
+            Debug.Log("AI is attacking! You defended the attack! You loose no HP.");
+            int rand = Random.Range(1, 101);
+            if(rand > 50) {
+                Debug.Log($"Uh oh, the AI broke your defense! The AI does { attackPoints } damage!");
+                playerHP -= attackPoints;
+            }
+        } else {
+            Debug.Log($"The AI attacks and does { attackPoints } damage!");
+            playerHP -= attackPoints;
+        }
+        DisplayStats();
+        ShowMessage();
+    }
+
+    // void AiCharge() {
+    //     Debug.Log("The AI is charging energy!");
+    //     aiIsCharging = true;
+    //     DisplayStats();
+    //     ShowMessage();
+    // }
 }
